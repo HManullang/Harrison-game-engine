@@ -1,38 +1,39 @@
-# This file was created by: Harrison
-# Harrisons edits will appear shortly...
+# This file was created by: Harrisin Manullang
+# Harrison's edits will appear shortly...
 
-# Libraries imported here
+# 
 import pygame as pg
 from settings import *
 from sprites import *
 import sys
 from random import randint
 from os import path
- 
-# Game class is created here
+
+# create a game class 
 class Game:
-    # Methods
+    # behold the methods...
     def __init__(self):
         pg.init()
-        # Sets the mode of the screen to width and height
+        # 
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
-        # writes text on the display
+        # 
         pg.display.set_caption("My First Video Game")
-        # sets the clock
+        # 
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500, 100)
         self.running = True
-        # Game info will be stored here later on
+        # later on we'll story game info with this
         self.load_data()
     def load_data(self):
         game_folder = path.dirname(__file__)
+        img_folder = path.dirname(__file__)
+        self.player_img = pg.image.load(path.join(img_folder, ' tank.png'))
         self.map_data = []
         '''
-        With statement - content manager
-        Used to make sure resources are closed properly
-        after they are used. Can prevent errors.
+        The with statement is a context manager in Python. 
+        It is used to ensure that a resource is properly closed or released 
+        after it is used. This can help to prevent errors and leaks.
         '''
-        #opens the folder map.txt
         with open(path.join(game_folder, 'map.txt'), 'rt') as f:
             for line in f:
                 print(line)
@@ -41,8 +42,9 @@ class Game:
     def new(self):
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
-        #self.player = Player(self, 10, 10)
-       # self.all_sprites.add(self.player)
+        self.coins = pg.sprite.Group()
+        # self.player = Player(self, 10, 10)
+        # self.all_sprites.add(self.player)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
         for row, tiles in enumerate(self.map_data):
@@ -52,51 +54,58 @@ class Game:
                 if tile == '1':
                     print("a wall at", row, col)
                     Wall(self, col, row)
-                if tile == 'p':
+                if tile == 'P':
                     self.player = Player(self, col, row)
-                if tile == 'e':
-                    self.enemy = Enemy(self, col, row)
-#defines when the game is running
+                if tile == 'C':
+                    Coin(self, col, row)
     def run(self):
         self.playing = True
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
-            # input
+            # this is input
             self.events()
-            #  processing
+            # this is processing
             self.update()
-            #  output
+            # this output
             self.draw()
-#defs the quit function
+
     def quit(self):
         pg.quit()
         sys.exit()
     # methods
-    def input(self):
+    def input(self): 
         pass
     def update(self):
         self.all_sprites.update()
-   #draws the grid of the screen
+    
     def draw_grid(self):
         for x in range(0, WIDTH, TILESIZE):
             pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
         for y in range(0, HEIGHT, TILESIZE):
             pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
-#sets the color of the screen
+    def draw_text(self, surface, text, size, color, x, y):
+        font_name = pg.font.match_font('arial')
+        font = pg.font.Font(font_name, size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.topleft = (x*TILESIZE,y*TILESIZE)
+        surface.blit(text_surface, text_rect)
     def draw(self):
         self.screen.fill(BGCOLOR)
         self.draw_grid()
         self.all_sprites.draw(self.screen)
+        # self.draw_text(self.screen, str(self.player.moneybag), 64, WHITE, 1, 1)
         pg.display.flip()
- 
+     
+
     def events(self):
-            # listen for events on the keyboard here
+            # listening for events
             for event in pg.event.get():
-                # whit red x = game closes
+                # when you hit the red x the window closes the game ends
                 if event.type == pg.QUIT:
                     self.quit()
                     print("the game has ended..")
-                # controls (keyboard events)
+                # keyboard events
                 # if event.type == pg.KEYDOWN:
                 #     if event.key == pg.K_LEFT:
                 #         self.player.move(dx=-1)
@@ -113,7 +122,7 @@ class Game:
         pass
     def show_go_screen(self):
         pass
-#Activates Game
+####################### Instantiate game... ###################
 g = Game()
 # g.show_go_screen()
 while True:
