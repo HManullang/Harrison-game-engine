@@ -1,33 +1,66 @@
-# This file was created by: Harrisin Manullang
-# Harrison's edits will appear shortly...
+# This file was created by: Chris Cozort
+# per 6 is the best period
+# import libraries and modules
+# my first source control edit
+'''
+Game design truths:
+goals, rules, feedback, freedom, what the verb, and will it form a sentence 
 
-# 
+
+
+
+'''
 import pygame as pg
 from settings import *
 from sprites import *
-import sys
 from random import randint
+import sys
 from os import path
 
-# create a game class 
-class Game:
-    # behold the methods...
+# added this math function to round down the clock
+from math import floor
+
+# this 'cooldown' class is designed to help us control time
+class Cooldown():
+    # sets all properties to zero when instantiated...
     def __init__(self):
+        self.current_time = 0
+        self.event_time = 0
+        self.delta = 0
+        # ticking ensures the timer is counting...
+    # must use ticking to count up or down
+    def ticking(self):
+        self.current_time = floor((pg.time.get_ticks())/1000)
+        self.delta = self.current_time - self.event_time
+    # resets event time to zero - cooldown reset
+    def countdown(self, x):
+        x = x - self.delta
+        if x != None:
+            return x
+    def event_reset(self):
+        self.event_time = floor((pg.time.get_ticks())/1000)
+    # sets current time
+    def timer(self):
+        self.current_time = floor((pg.time.get_ticks())/1000)
+
+
+# Define game class...
+class Game:
+    # Define a special method to init the properties of said class...
+    def __init__(self):
+        # init pygame
         pg.init()
-        # 
+        # set size of screen and be the screen
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
-        # 
-        pg.display.set_caption("My First Video Game")
-        # 
+        pg.display.set_caption(TITLE)
+        # setting game clock 
         self.clock = pg.time.Clock()
-        pg.key.set_repeat(500, 100)
-        self.running = True
-        # later on we'll story game info with this
         self.load_data()
+        # added images folder and image in the load_data method for use with the player
     def load_data(self):
         game_folder = path.dirname(__file__)
-        img_folder = path.dirname(__file__)
-        self.player_img = pg.image.load(path.join(img_folder, ' tank.png'))
+        img_folder = path.join(game_folder, 'images')
+        self.player_img = pg.image.load(path.join(img_folder, 'autobot.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -38,13 +71,18 @@ class Game:
             for line in f:
                 print(line)
                 self.map_data.append(line)
-                print(self.map_data)
+
+    # Create run method which runs the whole GAME
     def new(self):
+        # create timer
+        self.test_timer = Cooldown()
+        print("create new game...")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
-        # self.player = Player(self, 10, 10)
-        # self.all_sprites.add(self.player)
+        self.mobs = pg.sprite.Group()
+        self.power_ups = pg.sprite.Group()
+        # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
         for row, tiles in enumerate(self.map_data):
@@ -58,73 +96,68 @@ class Game:
                     self.player = Player(self, col, row)
                 if tile == 'C':
                     Coin(self, col, row)
+                if tile == 'M':
+                    Mob(self, col, row)
+                if tile == 'U':
+                    PowerUp(self, col, row)
+
     def run(self):
+        # 
         self.playing = True
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
-            # this is input
             self.events()
-            # this is processing
             self.update()
-            # this output
             self.draw()
-
     def quit(self):
-        pg.quit()
-        sys.exit()
-    # methods
-    def input(self): 
-        pass
+         pg.quit()
+         sys.exit()
+
     def update(self):
+        # tick the test timer
+        self.test_timer.ticking()
         self.all_sprites.update()
     
     def draw_grid(self):
-        for x in range(0, WIDTH, TILESIZE):
-            pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
-        for y in range(0, HEIGHT, TILESIZE):
-            pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
+         for x in range(0, WIDTH, TILESIZE):
+              pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
+         for y in range(0, HEIGHT, TILESIZE):
+              pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
+    
     def draw_text(self, surface, text, size, color, x, y):
         font_name = pg.font.match_font('arial')
         font = pg.font.Font(font_name, size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
-        text_rect.topleft = (x*TILESIZE,y*TILESIZE)
+        text_rect.topleft = (x,y)
         surface.blit(text_surface, text_rect)
+    
     def draw(self):
-        self.screen.fill(BGCOLOR)
-        self.draw_grid()
-        self.all_sprites.draw(self.screen)
-        # self.draw_text(self.screen, str(self.player.moneybag), 64, WHITE, 1, 1)
-        pg.display.flip()
-     
+            self.screen.fill(BGCOLOR)
+            self.draw_grid()
+            self.all_sprites.draw(self.screen)
+            # draw the timer
+            self.draw_text(self.screen, str(self.test_timer.countdown(45)), 24, WHITE, WIDTH/2 - 32, 2)
+            pg.display.flip()
 
     def events(self):
-            # listening for events
-            for event in pg.event.get():
-                # when you hit the red x the window closes the game ends
-                if event.type == pg.QUIT:
-                    self.quit()
-                    print("the game has ended..")
-                # keyboard events
-                # if event.type == pg.KEYDOWN:
-                #     if event.key == pg.K_LEFT:
-                #         self.player.move(dx=-1)
-                # if event.type == pg.KEYDOWN:
-                #     if event.key == pg.K_RIGHT:
-                #         self.player.move(dx=1)
-                # if event.type == pg.KEYDOWN:
-                #     if event.key == pg.K_UP:
-                #         self.player.move(dy=-1)
-                # if event.type == pg.KEYDOWN:
-                #     if event.key == pg.K_DOWN:
-                #         self.player.move(dy=1)
-    def show_start_screen(self):
-        pass
-    def show_go_screen(self):
-        pass
-####################### Instantiate game... ###################
+         for event in pg.event.get():
+            if event.type == pg.QUIT:
+                self.quit()
+            # if event.type == pg.KEYDOWN:
+            #     if event.key == pg.K_LEFT:
+            #         self.player.move(dx=-1)
+            #     if event.key == pg.K_RIGHT:
+            #         self.player.move(dx=1)
+            #     if event.key == pg.K_UP:
+            #         self.player.move(dy=-1)
+            #     if event.key == pg.K_DOWN:
+            #         self.player.move(dy=1)
+
+# Instantiate the game... 
 g = Game()
-# g.show_go_screen()
+# use game method run to run
+# g.show_start_screen()
 while True:
     g.new()
     g.run()
