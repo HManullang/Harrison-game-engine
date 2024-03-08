@@ -131,6 +131,7 @@ class Game:
         text_rect = text_surface.get_rect()
         text_rect.topleft = (x,y)
         surface.blit(text_surface, text_rect)
+
     
     def draw(self):
             self.screen.fill(BGCOLOR)
