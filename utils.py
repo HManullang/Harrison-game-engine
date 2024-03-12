@@ -26,4 +26,3 @@ class Timer():
         self.event_time = floor((pg.time.get_ticks())/1000)
     # sets current time
     def get_current_time(self):
-        self.current_time = floor((pg.time.get_ticks())/1000)
