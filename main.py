@@ -5,7 +5,7 @@
 '''
 Game design truths:
 goals, rules, feedback, freedom, what the verb, and will it form a sentence 
-
+..
 
 
 
@@ -13,6 +13,7 @@ goals, rules, feedback, freedom, what the verb, and will it form a sentence
 import pygame as pg
 from settings import *
 from sprites import *
+from utils import *
 from random import randint
 import sys
 from os import path
@@ -20,28 +21,6 @@ from os import path
 # added this math function to round down the clock
 from math import floor
 
-# this 'cooldown' class is designed to help us control time
-class Cooldown():
-    # sets all properties to zero when instantiated...
-    def __init__(self):
-        self.current_time = 0
-        self.event_time = 0
-        self.delta = 0
-        # ticking ensures the timer is counting...
-    # must use ticking to count up or down
-    def ticking(self):
-        self.current_time = floor((pg.time.get_ticks())/1000)
-        self.delta = self.current_time - self.event_time
-    # resets event time to zero - cooldown reset
-    def countdown(self, x):
-        x = x - self.delta
-        if x != None:
-            return x
-    def event_reset(self):
-        self.event_time = floor((pg.time.get_ticks())/1000)
-    # sets current time
-    def timer(self):
-        self.current_time = floor((pg.time.get_ticks())/1000)
 
 
 # Define game class...
@@ -50,6 +29,7 @@ class Game:
     def __init__(self):
         # init pygame
         pg.init()
+        pg.mixer.init()
         # set size of screen and be the screen
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
@@ -59,8 +39,11 @@ class Game:
         # added images folder and image in the load_data method for use with the player
     def load_data(self):
         game_folder = path.dirname(__file__)
-        img_folder = path.join(game_folder, 'images')
-        self.player_img = pg.image.load(path.join(img_folder, 'autobot.png')).convert_alpha()
+        self.img_folder = path.join(game_folder, 'images')
+        self.snd_folder = path.join(game_folder, 'sounds')
+
+        self.player_img = pg.image.load(path.join(self.img_folder, 'autobot.png')).convert_alpha()
+        self.mob_img = pg.image.load(path.join(self.img_folder, 'decepticon.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -72,16 +55,26 @@ class Game:
                 print(line)
                 self.map_data.append(line)
 
+    def test_method(self):
+        print("I can be called from Sprites...")
+
     # Create run method which runs the whole GAME
     def new(self):
+        # loading sound for use...not used yet
+        pg.mixer.music.load(path.join(self.snd_folder, 'soundtrack2.mp3'))
+        self.collect_sound = pg.mixer.Sound(path.join(self.snd_folder, 'sfx_sounds_powerup16.wav'))
         # create timer
-        self.test_timer = Cooldown()
+        
+        self.cooldown = Timer(self)
+        self.testclass = Test()
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        self.pew_pews = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
+
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -98,11 +91,14 @@ class Game:
                     Coin(self, col, row)
                 if tile == 'M':
                     Mob(self, col, row)
+                if tile == 'm':
+                    Mob2(self, col, row)
                 if tile == 'U':
                     PowerUp(self, col, row)
 
     def run(self):
-        # 
+        # start playing sound on infinite loop (loops=-1)
+        pg.mixer.music.play(loops=-1)
         self.playing = True
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
@@ -115,7 +111,7 @@ class Game:
 
     def update(self):
         # tick the test timer
-        self.test_timer.ticking()
+        self.cooldown.ticking()
         self.all_sprites.update()
     
     def draw_grid(self):
@@ -129,16 +125,17 @@ class Game:
         font = pg.font.Font(font_name, size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
-        text_rect.topleft = (x,y)
+        text_rect.midtop = (x,y)
         surface.blit(text_surface, text_rect)
-
     
     def draw(self):
             self.screen.fill(BGCOLOR)
-            self.draw_grid()
+            # self.draw_grid()
             self.all_sprites.draw(self.screen)
             # draw the timer
-            self.draw_text(self.screen, str(self.test_timer.countdown(45)), 24, WHITE, WIDTH/2 - 32, 2)
+            self.draw_text(self.screen, str(self.cooldown.current_time), 24, WHITE, WIDTH/2 - 32, 2)
+            self.draw_text(self.screen, str(self.cooldown.event_time), 24, WHITE, WIDTH/2 - 32, 80)
+            self.draw_text(self.screen, str(self.cooldown.get_countdown()), 24, WHITE, WIDTH/2 - 32, 120)
             pg.display.flip()
 
     def events(self):
@@ -154,11 +151,27 @@ class Game:
             #         self.player.move(dy=-1)
             #     if event.key == pg.K_DOWN:
             #         self.player.move(dy=1)
+    def show_start_screen(self):
+        self.screen.fill(BGCOLOR)
+        self.draw_text(self.screen, "This is the start screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
+        pg.display.flip()
+        self.wait_for_key()
+    
+    def wait_for_key(self):
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    waiting = False
+                    self.quit()
+                if event.type == pg.KEYUP:
+                    waiting = False
 
 # Instantiate the game... 
 g = Game()
 # use game method run to run
-# g.show_start_screen()
+g.show_start_screen()
 while True:
     g.new()
     g.run()
