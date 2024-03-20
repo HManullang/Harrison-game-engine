@@ -102,7 +102,6 @@ class Player(pg.sprite.Sprite):
         # self.collide_with_group(self.game.projectiles, True)
         self.collide_with_group(self.game.deathblocks, False)
         self.collide_with_group(self.game.speedboost, True)
-        self.collide_with_group(self.game.speedbump, True)
         self.collide_with_group(self.game.mobs, False)
 
         # coin_hits = pg.sprite.spritecollide(self.game.coins, True)
@@ -117,9 +116,10 @@ class Mob(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(PURPLE)
+        img_folder = path.join(game_folder, 'images')
+        self.mob_img = pg.image.load(path.join(img_folder, 'dog.png')).convert_alpha()
         #self.image = self.game.mob_img
+        #added image of dog, my freind is afraid of dogs
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -205,7 +205,7 @@ class Coin(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
-class Deathblock(pg.sprite.Sprite):
+class D(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.deathblocks
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -231,7 +231,7 @@ class Speedboost (pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
-class Speedbump (pg.sprite.Sprite):
+class  (pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.speedbump
         pg.sprite.Sprite.__init__(self, self.groups)
