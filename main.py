@@ -12,7 +12,7 @@ import pygame as pg
 from settings import *
 from sprites import *
 import sys
-from os import path 
+from os import path
 from random import randint
 from math import floor
 
@@ -68,8 +68,9 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
-        self. = pg.sprite.Group()
+        self.teleport = pg.sprite.Group()
         self.speedboost = pg.sprite.Group()
+        self.ratelimiter= pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
