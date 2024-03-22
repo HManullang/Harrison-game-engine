@@ -68,7 +68,7 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
-        self.deathblocks = pg.sprite.Group()
+        self.invulnerability = pg.sprite.Group()
         self.speedboost = pg.sprite.Group()
         self.ratelimiter= pg.sprite.Group()
         self.mobs = pg.sprite.Group()
@@ -90,7 +90,7 @@ class Game:
                     self.p1row = row
                     self.p1 = Player(self, self.p1col, self.p1row)
                 if tile == 'd':
-                    Deathblock(self, col, row)
+                    invulnerability(self, col, row)
                     (self, col, row)
                 if tile == 'S':
                     Speedboost(self, col, row)
