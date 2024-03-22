@@ -80,9 +80,9 @@ class Player(pg.sprite.Sprite):
                 self.moneybag += 1
             # if str(hits[0].__class__.__name__) == "Projectile":
             #     self.moneybag += 1
-            if str(hits[0].__class__.__name__) == "":
+            if str(hits[0].__class__.__name__) == "deathblock":
                 self.detath()
-            if str(hits[0].__class__.__name__) == "":
+            if str(hits[0].__class__.__name__) == "speedboost":
                 self.speed += 200
             if str(hits[0].__class__.__name__) == "ratelimiter":
                 self.speed -= 150

@@ -51,7 +51,7 @@ class Game:
         game_folder = path.dirname(__file__)
         # pull images from folders 
         img_folder = path.join(game_folder, 'images')
-        self.player_img = pg.image.load(path.join(img_folder, 'tank.png')).convert_alpha()
+        self.player_img = pg.image.load(path.join(img_folder, 'tank2.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -69,7 +69,6 @@ class Game:
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.deathblocks = pg.sprite.Group()
-        self.teleport = pg.sprite.Group()
         self.speedboost = pg.sprite.Group()
         self.ratelimiter= pg.sprite.Group()
         self.mobs = pg.sprite.Group()
