@@ -52,6 +52,7 @@ class Game:
         # pull images from folders 
         img_folder = path.join(game_folder, 'images')
         self.player_img = pg.image.load(path.join(img_folder, 'tank2.png')).convert_alpha()
+        self.mob_img = pg.image.load(path.join(img_folder, 'dog.png')).convert_alpha()
         self.map_data = []
         '''
         The with statement is a context manager in Python. 
@@ -68,7 +69,7 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
-        self.invulnerability = pg.sprite.Group()
+        self.deathblock = pg.sprite.Group()
         self.speedboost = pg.sprite.Group()
         self.ratelimiter= pg.sprite.Group()
         self.mobs = pg.sprite.Group()
@@ -90,12 +91,12 @@ class Game:
                     self.p1row = row
                     self.p1 = Player(self, self.p1col, self.p1row)
                 if tile == 'd':
-                    invulnerability(self, col, row)
+                    Deathblock(self, col, row)
                     (self, col, row)
                 if tile == 'S':
                     Speedboost(self, col, row)
                 if tile == 'B':
-                    ratelimiter(self, col, row)
+                    Ratelimiter(self, col, row)
                 if tile == 'M':
                     Mob(self, col, row)
 

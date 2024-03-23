@@ -80,11 +80,11 @@ class Player(pg.sprite.Sprite):
                 self.moneybag += 1
             # if str(hits[0].__class__.__name__) == "Projectile":
             #     self.moneybag += 1
-            if str(hits[0].__class__.__name__) == "invlunerability":
+            if str(hits[0].__class__.__name__) == "Deathblock":
                 self.detath()
-            if str(hits[0].__class__.__name__) == "speedboost":
-                self.speed += 250
-            if str(hits[0].__class__.__name__) == "ratelimiter":
+            if str(hits[0].__class__.__name__) == "Speedboost":
+                self.speed += 200
+            if str(hits[0].__class__.__name__) == "Ratelimiter":
                 self.speed -= 150
             if str(hits[0].__class__.__name__) == "Mob":
                 self.detath()
@@ -96,12 +96,12 @@ class Player(pg.sprite.Sprite):
         self.rect.x = self.x
        
         self.collide_with_walls('x')
-        self.rect.y = self.y
+        self.rect.y= self.y
         
         self.collide_with_walls('y')
         self.collide_with_group(self.game.coins, True)
         # self.collide_with_group(self.game.projectiles, True)
-        self.collide_with_group(self.game.invulnerability, False)
+        self.collide_with_group(self.game.deathblock, False)
         self.collide_with_group(self.game.speedboost, True)
         self.collide_with_group(self.game.ratelimiter,True)
         self.collide_with_group(self.game.mobs, False)
@@ -118,8 +118,9 @@ class Mob(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(PURPLE)
+        self.image = game.mob_img
+        # self.image = pg.Surface((TILESIZE, TILESIZE))
+        # self.image.fill(PURPLE)
         #self.image = self.game.mob_img
         self.rect = self.image.get_rect()
         self.x = x
@@ -156,12 +157,12 @@ class Mob(pg.sprite.Sprite):
         #mob movement
         if self.rect.x < self.rect.x:
             self.vx = 100
-        # if self.rect.x > self.game.player.rect.x:
-        #     self.vx = -100    
+        if self.rect.x > self.rect.x:
+            self.vx = -100    
         if self.rect.y < self.rect.y:
             self.vy = 100
-        # if self.rect.y > self.game.player.rect.y:
-        #     self.vy = -100
+        if self.rect.y > self.rect.y:
+            self.vy = -100
         self.rect.x = self.x
         self.collide_with_walls('x')
         self.rect.y = self.y
@@ -206,7 +207,7 @@ class Coin(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
-class ratelimiter (pg.sprite.Sprite):
+class Ratelimiter (pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.ratelimiter
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -232,9 +233,9 @@ class Speedboost (pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
-class invulnerability(pg.sprite.Sprite):
+class Deathblock(pg.sprite.Sprite):
     def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.invulnerability
+        self.groups = game.all_sprites, game.deathblock
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
