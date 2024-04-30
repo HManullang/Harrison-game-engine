@@ -1,5 +1,6 @@
 #Three Features Consisting My Game
-
+#Created by Harrison Manullang
+#Credits to Chris Bradfield
 #
 #Speed Boost
 #Deathblock
@@ -51,7 +52,7 @@ class Game:
         game_folder = path.dirname(__file__)
         # pull images from folders 
         img_folder = path.join(game_folder, 'images')
-        self.player_img = pg.image.load(path.join(img_folder, 'tank2.png')).convert_alpha()
+        self.player_img = pg.image.load(path.join(img_folder, 'theBell.png')).convert_alpha()
         self.mob_img = pg.image.load(path.join(img_folder, 'dog.png')).convert_alpha()
         self.map_data = []
         '''
@@ -68,6 +69,7 @@ class Game:
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
+        self.gun = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.deathblock = pg.sprite.Group()
         self.speedboost = pg.sprite.Group()
@@ -99,6 +101,15 @@ class Game:
                     Ratelimiter(self, col, row)
                 if tile == 'M':
                     Mob(self, col, row)
+
+    def events(self):
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                self.quit()
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse button
+                    # Call the shoot method of the player
+                    self.player.shootwa()
 
     def run(self):
         # runs game
