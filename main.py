@@ -47,12 +47,16 @@ class Game:
         pg.display.set_caption(TITLE)
         # setting game clock 
         self.clock = pg.time.Clock()
+        self.all_sprites = pg.sprite.Group()
         self.load_data()
+        self.projectiles = pg.sprite.Group()  # Group for projectiles
+        self.player = Player(self, 100, 100)
+        
     def load_data(self):
         game_folder = path.dirname(__file__)
         # pull images from folders 
         img_folder = path.join(game_folder, 'images')
-        self.player_img = pg.image.load(path.join(img_folder, 'theBell.png')).convert_alpha()
+        self.player_img = pg.image.load(path.join(img_folder, 'tank.png')).convert_alpha()
         self.mob_img = pg.image.load(path.join(img_folder, 'dog.png')).convert_alpha()
         self.map_data = []
         '''

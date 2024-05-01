@@ -4,6 +4,7 @@
 import pygame as pg
 from settings import *
 from os import path
+import math
 
 vec =pg.math.Vector2
 
@@ -35,6 +36,7 @@ class Player(pg.sprite.Sprite):
         # init super class
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
+        
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.spritesheet = Spritesheet(path.join(img_folder, SPRITESHEET))
         #self.image.fill(GREEN)
