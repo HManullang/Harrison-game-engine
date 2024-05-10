@@ -47,10 +47,6 @@ class Game:
         pg.display.set_caption(TITLE)
         # setting game clock 
         self.clock = pg.time.Clock()
-        self.all_sprites = pg.sprite.Group()
-        self.load_data()
-        self.projectiles = pg.sprite.Group()  # Group for projectiles
-        self.player = Player(self, 100, 100)
         
     def load_data(self):
         game_folder = path.dirname(__file__)
@@ -70,6 +66,7 @@ class Game:
                 self.map_data.append(line)
     # Create run method which runs the whole GAME
     def new(self):
+        self.load_data()
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
@@ -105,15 +102,8 @@ class Game:
                     Ratelimiter(self, col, row)
                 if tile == 'M':
                     Mob(self, col, row)
-
-    def events(self):
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                self.quit()
-            elif event.type == pg.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left mouse button
-                    # Call the shoot method of the player
-                    self.player.shootwa()
+                if tile == 'A':
+                    Mob2(self, col, row)  
 
     def run(self):
         # runs game
@@ -128,6 +118,7 @@ class Game:
          sys.exit()
     def update(self):
         self.all_sprites.update()
+        # self.autolock.update()
         # self.test_timer.ticking()
 
     # makes grid appear on screen
@@ -152,20 +143,20 @@ class Game:
             self.draw_text(self.screen, str(self.p1.moneybag), 64, WHITE, 1, 1)
             #self.draw_text(self.screen, str(self.test_timer.countdown(45)), 24, WHITE, WIDTH/2 - 32, 2)
             pg.display.flip()
+            self.clock.tick(60)
+    
 
-
-    # def draw_text(self, surface, text, size, color, x, y):
-    #     font_name = pg.font.match('arial')
-    #     font = pg.font.Font(font_name, size)
-    #     text_surface = font.render(text, True, color)
-    #     text_rect = text_surface.get_rect()
-    #     text_rect.topleft = (x,y)
-    #     surface.blit(text_surface, text_rect)
 
     def events(self):
          for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit()
+    
+    def show_start_screen(self):
+        pass
+
+    def show_game_over_screen(self):
+        pass
     
             # if event.type == pg.KEYDOWN:
             #     if event.key == pg.K_LEFT:

@@ -6,7 +6,7 @@ from settings import *
 from os import path
 import math
 
-vec =pg.math.Vector2
+vec = pg.math.Vector2
 
 # needed for animated sprite
 SPRITESHEET = "theBell.png"
@@ -141,7 +141,11 @@ class Player(pg.sprite.Sprite):
                 self.speed -= 150
             if str(hits[0].__class__.__name__) == "Mob":
                 self.death()
-    
+            if str(hits[0]._class_._name_) == "Mob2":
+                self.hitpoints -= 1
+                hits[0]. health -= 1
+            
+
     def load_images(self):
         self.standing_frames = [self.spritesheet.get_image(0,0,32,32),self.spritesheet.get_image(32 ,0, 32, 32)]
     
@@ -166,21 +170,15 @@ class Player(pg.sprite.Sprite):
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
         self.rect.x = self.x
-        if self.collide_with_group == True:
-            self.collide_with_walls('x')
-        self.rect.y = self.y
-        if self.collide_with_group == True:
-            self.collide_with_walls('y')
         self.collide_with_walls('x')
-        self.rect.y= self.y
-        
+        self.rect.y = self.y
         self.collide_with_walls('y')
         self.collide_with_group(self.game.coins, True)
-        # self.collide_with_group(self.game.projectiles, True)
         self.collide_with_group(self.game.deathblock, False)
         self.collide_with_group(self.game.speedboost, True)
         self.collide_with_group(self.game.ratelimiter,True)
         self.collide_with_group(self.game.mobs, False)
+        
 
         # coin_hits = pg.sprite.spritecollide(self.game.coins, True)
         # if coin_hits:
@@ -332,3 +330,76 @@ class Gun(pg.sprite.Sprite):
         self.rect.y -= -self.speed
         # self.rect.x -= self.speed
         # will destory mobs when it hits it
+
+
+class Mob2(pg.sprite.Sprite):
+    def __init__(self, game, x, y, speed):
+        self.groups = game.all_sprites, game.mobs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        # self.image = game.mob_img
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(PURPLE)
+        # self.image = self.game.mob_img
+        # self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.hit_rect = MOB_HIT_RECT.copy()
+        self.hit_rect.center = self.rect.center
+        self.pos = vec(x, y) * TILESIZE
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
+        self.rect.center = self.pos
+        self.rot = 0
+        self.chase_distance = 500
+        # added
+        self.speed = speed
+        self.chasing = True
+        # self.health = MOB_HEALTH
+        self.hitpoints = MOB_HITPOINTS
+        self.hitpoints = 100
+        self.health = 100
+    def sensor(self):
+        if abs(self.rect.x - self.game.player.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player.rect.y) < self.chase_distance:
+            self.chasing = True
+        else:
+            self.chasing = False
+    def update(self):
+        if self.hitpoints <= 0:
+            self.kill()
+        self.sensor()
+        if self.chasing:
+            self.rot = (self.game.player.rect.center - self.pos).angle_to(vec(1, 0))
+            self.image = pg.transform.rotate(self.game.mob_img, self.rot)
+            self.rect = self.image.get_rect()
+            self.rect.center = self.pos
+            self.acc = vec(self.speed, 0).rotate(-self.rot)
+            self.acc += self.vel * -1
+            self.vel += self.acc * self.game.dt
+            # equation of motion
+            self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+            # hit_rect used to account for adjusting the square collision when image rotates
+            self.hit_rect.centerx = self.pos.x
+            collide_with_walls(self, self.game.walls, 'x')
+            self.hit_rect.centery = self.pos.y
+            collide_with_walls(self, self.game.walls, 'y')
+            self.rect.center = self.hit_rect.center
+        
+
+class Bullet(pg.sprite.Sprite):
+    def __init__(self, game, x, y, target):
+        self.groups = game.all_sprites, game.bullets
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE/4, TILESIZE/4))
+        self.image.fill(RED)  # Adjust color as needed
+        self.rect = self.image.get_rect()
+        self.speed = 10  # Adjust speed as needed
+
+        # Calculate the direction vector towards the target
+        self.direction_vector = pg.math.Vector2(target) - pg.math.Vector2(self.rect.center)
+        self.direction_vector.normalize()
+
+    def update(self):
+        # Update bullet's position based on direction and speed
+        self.rect.x += self.direction_vector.x * self.speed
+        self.rect.y += self.direction_vector.y * self.speed
