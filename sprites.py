@@ -29,6 +29,26 @@ class Spritesheet:
         # image = pg.transform.scale(image, (width, height))
         image = pg.transform.scale(image, (width * 1, height * 1))
         return image
+    
+def collide_with_walls(sprite, group, dir):
+    if dir == 'x':
+        hits = pg.sprite.spritecollide(sprite, group, False)
+        if hits:
+            if hits[0].rect.centerx > sprite.rect.centerx:
+                sprite.pos.x = hits[0].rect.left - sprite.rect.width / 2
+            if hits[0].rect.centerx < sprite.rect.centerx:
+                sprite.pos.x = hits[0].rect.right + sprite.rect.width / 2
+            sprite.vel.x = 0
+            sprite.rect.centerx = sprite.pos.x
+    if dir == 'y':
+        hits = pg.sprite.spritecollide(sprite, group, False)
+        if hits:
+            if hits[0].rect.centery > sprite.rect.centery:
+                sprite.pos.y = hits[0].rect.top - sprite.rect.height / 2
+            if hits[0].rect.centery < sprite.rect.centery:
+                sprite.pos.y = hits[0].rect.bottom + sprite.rect.height / 2
+            sprite.vel.y = 0
+            sprite.rect.centery = sprite.pos.y
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -107,25 +127,26 @@ class Player(pg.sprite.Sprite):
             print(p.rect.y)
            
    
-    def collide_with_walls(sprite, group, dir):
-      if dir == 'x':
-        hits = pg.sprite.spritecollide(sprite, group, False)
-        if hits:
-            if hits[0].rect.centerx > sprite.rect.centerx:
-                sprite.pos.x = hits[0].rect.left - sprite.rect.width / 2
-            if hits[0].rect.centerx < sprite.rect.centerx:
-                sprite.pos.x = hits[0].rect.right + sprite.rect.width / 2
-            sprite.vel.x = 0
-            sprite.rect.centerx = sprite.pos.x
+    def collide_with_walls(self, dir): 
+        if dir == 'x':
+            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            if hits:
+                if self.vx > 0:
+                    self.x = hits[0].rect.left - self.rect.width
+                if self.vx < 0:
+                    self.x = hits[0].rect.right
+                self.vx = 0
+                self.rect.x = self.x
         if dir == 'y':
-         hits = pg.sprite.spritecollide(sprite, group, False)
-        if hits:
-            if hits[0].rect.centery > sprite.rect.centery:
-                sprite.pos.y = hits[0].rect.top - sprite.rect.height / 2
-            if hits[0].rect.centery < sprite.rect.centery:
-                sprite.pos.y = hits[0].rect.bottom + sprite.rect.height / 2
-            sprite.vel.y = 0
-            sprite.rect.centery = sprite.pos.y
+            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            if hits:
+                if self.vy > 0:
+                    self.y = hits[0].rect.top - self.rect.height
+                if self.vy < 0:
+                    self.y = hits[0].rect.bottom
+                self.vy = 0
+                self.rect.y = self.y
+
 
     #
     # player group collisions
@@ -137,14 +158,14 @@ class Player(pg.sprite.Sprite):
             # if str(hits[0].__class__.__name__) == "Projectile":
             #     self.moneybag += 1
             if str(hits[0].__class__.__name__) == "Deathblock":
-                self.death()
+                self.detath()
             if str(hits[0].__class__.__name__) == "Speedboost":
                 self.speed += 200
             if str(hits[0].__class__.__name__) == "Ratelimiter":
                 self.speed -= 150
             if str(hits[0].__class__.__name__) == "Mob":
                 self.death()
-            if str(hits[0]._class_._name_) == "Mob2":
+            if str(hits[0].__class__.__name__) == "Mob2":
                 self.hitpoints -= 1
                 hits[0]. health -= 1
             
@@ -190,58 +211,6 @@ class Player(pg.sprite.Sprite):
 
 # classes for game
 
-class Mob(pg.sprite.Sprite):
-    def __init__(self, game, x, y, speed):
-        self.groups = game.all_sprites, game.mobs
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(BLACK)
-        # self.image = self.game.mob_img
-        self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
-        self.vx, self.vy = 100, 100
-        self.x = x * TILESIZE
-        self.y = y * TILESIZE
-        self.speed = speed
-        self.health = 32
-        self.max_health = 32
-
-        print("created mob at", self.rect.x, self.rect.y)
-    def collide_with_walls(self, dir):
-        if dir == 'x':
-            # print('colliding on the x')
-            hits = pg.sprite.spritecollide(self, self.game.walls, False)
-            if hits:
-                self.vx *= -1
-                self.rect.x = self.x
-        if dir == 'y':
-            # print('colliding on the y')
-            hits = pg.sprite.spritecollide(self, self.game.walls, False)
-            if hits:
-                self.vy *= -1
-                self.rect.y = self.y
-    def chasing(self):
-        if self.rect.x < self.game.player.rect.x:
-            self.vx = 100
-        if self.rect.x > self.game.player.rect.x:
-            self.vx = -100    
-        if self.rect.y < self.game.player.rect.y:
-            self.vy = 100
-        if self.rect.y > self.game.player.rect.y:
-            self.vy = -100
-
-   
-
-    def update(self):
-        self.x += self.vx * self.game.dt
-        self.y += self.vy * self.game.dt
-        self.rect.x = self.x
-        self.collide_with_walls('x')
-        self.rect.y = self.y
-        self.collide_with_walls('y')
-
 
 
 
@@ -270,6 +239,25 @@ class Wall(pg.sprite.Sprite):
 #         self.y = y
 #         self.rect.x = x * TILESIZE
 #         self.rect.y = y * TILESIZE
+
+class Bullet(pg.sprite.Sprite):
+    def __init__(self, game, x, y, direction):
+        self.groups = game.all_sprites, game.bullets
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE/4, TILESIZE/4))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.direction = direction
+        self.speed = 10
+        #Defeins velocity
+        self.velocity = self.direction * self.speed
+
+    def update(self):
+      #Updates coordinates  
+        self.rect.x += self.velocity.x
+        self.rect.y += self.velocity.y
 
 class Coin(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -348,7 +336,7 @@ class Gun(pg.sprite.Sprite):
         # will destory mobs when it hits it
 
 
-class Mob2(pg.sprite.Sprite):
+class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -357,7 +345,6 @@ class Mob2(pg.sprite.Sprite):
         # self.image = pg.Surface((TILESIZE, TILESIZE))
         # self.image.fill(ORANGE)
         self.image = self.game.mob_img
-    
         self.rect = self.image.get_rect()
         # self.hit_rect = MOB_HIT_RECT.copy()
         # self.hit_rect.center = self.rect.center
@@ -368,7 +355,7 @@ class Mob2(pg.sprite.Sprite):
         self.rot = 0
         self.chase_distance = 500
         # added
-        self.speed = 150
+        self.speed = 250
         self.chasing = False
         # self.health = MOB_HEALTH
     def sensor(self):
@@ -394,3 +381,36 @@ class Mob2(pg.sprite.Sprite):
             # self.rect.center = self.hit_rect.center
             # if self.health <= 0:
             #     self.kill(
+            
+class Autolock(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.autolock
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(PURPLE)  # Adjust color as needed
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.fire_rate = 125  # This is the fire rate of the turret in miliseconds
+        self.last_fire = pg.time.get_ticks()
+        #keeps track of time from when the last bullet was fired
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+    def update(self):
+        #gets the time in milliseconds
+        now = pg.time.get_ticks()
+        #calculates the time that has passed since the last bullet was fired, fires another bullet if the time that has 
+        #passed is greater than or equal to the fire rate
+        if now - self.last_fire >= self.fire_rate:
+            # This line calculates the bullet's direction to the player
+            direction = vec(self.game.player.rect.center) - vec(self.rect.center)
+            #Creates a vector from the turret to the player.
+            #Ensures that the bullet travels at a constant speed regardless of distance
+            direction = direction.normalize()
+            # Creates an instance of the bullet class
+            Bullet(self.game, self.rect.centerx, self.rect.centery, direction)
+            #allows the turret to track time since shooting
+            self.last_fire = now
+

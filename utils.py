@@ -3,26 +3,6 @@ import pygame as pg
 
 from math import floor
 
-def test_func():
-    print("Test func ran...")
-
-def collide_hit_rect(one, two):
-    return one.hit_rect.colliderect(two.rect)
-
-class Spritesheet:
-    def __init__(self, filename):
-        self.spritesheet = pg.image.load(filename).convert()
-
-    def get_image(self, x, y, width, height):
-        image = pg.Surface((width, height))
-        image.blit(self.spritesheet, (0,0), (x,y, width, height))
-        # use code below if scaling is necessary
-        # image = pg.transform.scale(image, (width // 2, height // 2))
-        return image
-
-
-
-
 class Timer():
     # sets all properties to zero when instantiated...
     def __init__(self, game):
@@ -42,8 +22,19 @@ class Timer():
     def countdown(self):
         if self.cd > 0:
             self.cd = self.cd - self.game.dt
-    # def event_reset(self):
-    #     self.event_time = floor((self.game.clock.)/1000)
+    def event_reset(self):
+        self.event_time = floor((pg.time.get_ticks())/1000)
     # sets current time
     def get_current_time(self):
         self.current_time = floor((pg.time.get_ticks())/1000)
+
+class Spritesheet:
+    def __init__(self, filename):
+        self.spritesheet = pg.image.load(filename).convert()
+
+    def get_image(self, x, y, width, height):
+        image = pg.Surface((width, height))
+        image.blit(self.spritesheet, (0,0, x,y, width, height))
+        image = pg.transform.scale(image, (width // 2, height // 2))
+        return image
+                                         

@@ -48,6 +48,9 @@ class Game:
         pg.display.set_caption(TITLE)
         # setting game clock 
         self.clock = pg.time.Clock()
+        self.mob_spawn_time = pg.time.get_ticks()
+        self.mob_spawn_interval = 5000  # Interval in milliseconds between spawns
+       #Chat gpt helped me create this
         
     def load_data(self):
         game_folder = path.dirname(__file__)
@@ -77,6 +80,9 @@ class Game:
         self.speedboost = pg.sprite.Group()
         self.ratelimiter= pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        self.bullets = pg.sprite.Group()
+        self.autolock = pg.sprite.Group()
+        self.cooldown = Timer(self)
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -101,10 +107,10 @@ class Game:
                     Speedboost(self, col, row)
                 if tile == 'B':
                     Ratelimiter(self, col, row)
-                if tile == 'm':
-                    Mob(self, col, row,)
                 if tile == 'U':
-                    Mob2(self, col, row,)  
+                    Mob(self, col, row,)  
+                if tile == 'A':
+                    Autolock(self, col, row)
 
     def run(self):
         # runs game
@@ -119,8 +125,21 @@ class Game:
          sys.exit()
     def update(self):
         self.all_sprites.update()
+        self.spawn_mobs()
         # self.autolock.update()
         # self.test_timer.ticking()
+    
+    def spawn_mobs(self):
+        now = pg.time.get_ticks()
+        if now - self.mob_spawn_time >= self.mob_spawn_interval:
+            # Generate random coordinates for the mob
+            x = randint(0, (WIDTH // TILESIZE) - 1)
+            y = randint(0, (HEIGHT // TILESIZE) - 1)
+            # Ensure mobs do not spawn inside walls
+            if not any([wall.rect.collidepoint(x * TILESIZE, y * TILESIZE) for wall in self.walls]):
+                Mob(self, x, y)
+            self.mob_spawn_time = now
+
 
     # makes grid appear on screen
     def draw_grid(self):
