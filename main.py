@@ -16,6 +16,7 @@ import sys
 from os import path
 from random import randint
 from math import floor
+from utils import *
 
 
 #cooldown class
@@ -92,7 +93,7 @@ class Game:
                     #finds thepalyers starting coordinates
                     self.p1col = col
                     self.p1row = row
-                    self.p1 = Player(self, self.p1col, self.p1row)
+                    self.player = Player(self, self.p1col, self.p1row)
                 if tile == 'd':
                     Deathblock(self, col, row)
                     (self, col, row)
@@ -100,10 +101,10 @@ class Game:
                     Speedboost(self, col, row)
                 if tile == 'B':
                     Ratelimiter(self, col, row)
-                if tile == 'M':
-                    Mob(self, col, row)
-                if tile == 'A':
-                    Mob2(self, col, row)  
+                if tile == 'm':
+                    Mob(self, col, row,)
+                if tile == 'U':
+                    Mob2(self, col, row,)  
 
     def run(self):
         # runs game
@@ -140,8 +141,7 @@ class Game:
             self.screen.fill(BGCOLOR)
             self.draw_grid()
             self.all_sprites.draw(self.screen)
-            self.draw_text(self.screen, str(self.p1.moneybag), 64, WHITE, 1, 1)
-            #self.draw_text(self.screen, str(self.test_timer.countdown(45)), 24, WHITE, WIDTH/2 - 32, 2)
+            self.draw_text(self.screen, str(self.player.moneybag), 64, WHITE, 1, 1)
             pg.display.flip()
             self.clock.tick(60)
     
