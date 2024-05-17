@@ -49,7 +49,7 @@ class Game:
         # setting game clock 
         self.clock = pg.time.Clock()
         self.mob_spawn_time = pg.time.get_ticks()
-        self.mob_spawn_interval = 5000  # Interval in milliseconds between spawns
+        self.mob_spawn_interval = 4000  # Interval in milliseconds between spawns
        #Chat gpt helped me create this
         
     def load_data(self):
