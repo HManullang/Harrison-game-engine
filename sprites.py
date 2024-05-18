@@ -5,7 +5,7 @@ import pygame as pg
 from settings import *
 from os import path
 import math
-
+import random
 
 
 vec = pg.math.Vector2
@@ -153,8 +153,10 @@ class Player(pg.sprite.Sprite):
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
-            if str(hits[0].__class__.__name__) == "Coin":
-                self.moneybag += 1
+            for hit in hits:
+                if str(hits[0].__class__.__name__) == "Coin":
+                        self.moneybag += 1
+                        hit.respawn()
             # if str(hits[0].__class__.__name__) == "Projectile":
             #     self.moneybag += 1
             if str(hits[0].__class__.__name__) == "Deathblock":
@@ -245,8 +247,8 @@ class Bullet(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.bullets
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE/4, TILESIZE/4))
-        self.image.fill(RED)
+        self.image = pg.Surface((TILESIZE/6, TILESIZE/6))
+        self.image.fill(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.direction = direction
@@ -271,6 +273,15 @@ class Coin(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+
+    def respawn(self):
+         # Respawn the coin at a new position
+        self.rect.x = random.randint(0, WIDTH // TILESIZE) * TILESIZE
+        self.rect.y = random.randint(0, HEIGHT // TILESIZE) * TILESIZE
+       
+  
+   
+        
 
 class Ratelimiter (pg.sprite.Sprite):
     def __init__(self, game, x, y):

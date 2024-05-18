@@ -17,7 +17,7 @@ from os import path
 from random import randint
 from math import floor
 from utils import *
-
+import random
 
 #cooldown class
 # class Cooldown():
@@ -51,6 +51,9 @@ class Game:
         self.mob_spawn_time = pg.time.get_ticks()
         self.mob_spawn_interval = 4000  # Interval in milliseconds between spawns
        #Chat gpt helped me create this
+        # Your existing initialization code...
+        # List of coin respawn timers
+        
         
     def load_data(self):
         game_folder = path.dirname(__file__)
@@ -83,6 +86,8 @@ class Game:
         self.bullets = pg.sprite.Group()
         self.autolock = pg.sprite.Group()
         self.cooldown = Timer(self)
+        # Add more coins as needed
+         # Create coins and their respawn timers
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):
         #     Wall(self, x, 5)
@@ -112,6 +117,16 @@ class Game:
                 if tile == 'A':
                     Autolock(self, col, row)
 
+    
+    def init_coins(self):
+        all_coin_positions = [(5, 5), (10, 10), (15, 15)]  # Example positions
+        # Create coins at the predetermined positions
+        chosen_positions = random.sample(all_coin_positions, 2)
+        for pos in chosen_positions:
+            Coin(self, pos[0], pos[1])
+            
+    
+    
     def run(self):
         # runs game
         self.playing = True
@@ -120,14 +135,20 @@ class Game:
             self.events()
             self.update()
             self.draw()
+        
     def quit(self):
          pg.quit()
          sys.exit()
+
+    
     def update(self):
         self.all_sprites.update()
         self.spawn_mobs()
-        # self.autolock.update()
-        # self.test_timer.ticking()
+        # Check if all coins are collected
+        if len(self.coins) == 0:
+        # Reset the level with a new set of coins
+            self.init_coins()
+    # makes grid appear on screen
     
     def spawn_mobs(self):
         now = pg.time.get_ticks()
@@ -139,6 +160,7 @@ class Game:
             if not any([wall.rect.collidepoint(x * TILESIZE, y * TILESIZE) for wall in self.walls]):
                 Mob(self, x, y)
             self.mob_spawn_time = now
+    
 
 
     # makes grid appear on screen
@@ -147,6 +169,24 @@ class Game:
               pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
          for y in range(0, HEIGHT, TILESIZE):
               pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
+
+     #start screen
+    def show_start_screen(self):
+        self.screen.fill(BGCOLOR)
+        self.draw_text(self.screen, "Press any button to begin/shoot the other player can collect coins to to win", 24, WHITE, 2, 3)
+        pg.display.flip()
+        self.wait_for_key()
+
+    def wait_for_key(self):
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    waiting = False
+                    self.quit()
+                if event.type == pg.KEYUP:
+                    waiting = False
 
     # shows clock on screen
     def draw_text(self, surface, text, size, color, x, y):
